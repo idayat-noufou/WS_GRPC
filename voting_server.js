@@ -3,15 +3,20 @@ const protoLoader = require('@grpc/proto-loader');
 const express = require('express');
 const app = express();
 
-const PROTO_PATH = './voting.proto';
-const packageDefinition = protoLoader.loadSync(PROTO_PATH, {});
+const PROTO_PATH = __dirname + '/voting.proto';
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, {keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true,});
 const votingProto = grpc.loadPackageDefinition(packageDefinition).voting;
+
 
 const votes = {};
 const subscribers = [];
 
 function vote(call, callback) {
-    const drawingId = call.request.drawing_id;
+    const drawingId = call.request.drawingId;
     if (!votes[drawingId]) {
         votes[drawingId] = 0;
     }
@@ -21,7 +26,7 @@ function vote(call, callback) {
     };
     callback(null, response);
     subscribers.forEach(subscriber => {
-        subscriber.write({ drawing_id: drawingId, count: votes[drawingId] });
+        subscriber.write({ drawingId: drawingId, count: votes[drawingId] });
     });
 }
 
@@ -41,7 +46,7 @@ server.addService(votingProto.VotingService.service, { vote, streamResults });
 const PORT = 50051;
 server.bindAsync(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure(), () => {
     console.log(`Server running at http://127.0.0.1:${PORT}`);
-    server.start();
+    // server.start();
 });
 
 const HTTP_PORT = 3000;

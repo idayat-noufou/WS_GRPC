@@ -10,7 +10,7 @@ function main() {
     const call = client.streamResults();
 
     call.on('data', (voteCount) => {
-        console.log(`Drawing ID: ${voteCount.drawing_id}, Count: ${voteCount.count}`);
+        console.log(`Drawing ID: ${voteCount.drawingId}, Count: ${voteCount.count}`);
     });
 
     call.on('end', () => {
